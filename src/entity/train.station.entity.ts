@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity('train_station')
-export class TrainStation {
+export default class TrainStation {
     @PrimaryColumn()
     id: number;
  

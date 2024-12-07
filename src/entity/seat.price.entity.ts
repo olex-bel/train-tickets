@@ -1,19 +1,19 @@
 import { Entity, Column, PrimaryColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { SeatClass } from './seat.class.entity';
-import { Schedule } from './schedule.entity';
+import SeatClass from './seat.class.entity';
+import JourneySchedule from './journey.schedule.entity';
 
 @Entity('seat_price')
 export class SeatPrice {
-    @Column({ name: 'price_per_km', type: 'decimal', precision: 10, scale: 2 })
-    pricePerKm: number;
+    @Column({ name: 'price', type: 'decimal', precision: 10, scale: 2 })
+    price: number;
 
     @ManyToOne(() => SeatClass)
-    @JoinColumn({ name: 'seat_class_id' })
-    @PrimaryColumn({ name: 'seat_class_id' })
+    @JoinColumn({ name: 'class_id', referencedColumnName: 'id' })
+    @PrimaryColumn({ name: 'class_id' })
     seatClass: SeatClass;
 
-    @ManyToOne(() => Schedule)
-    @JoinColumn({ name: 'schedule_id' })
+    @ManyToOne(() => JourneySchedule)
+    @JoinColumn({ name: 'schedule_id', referencedColumnName: 'id' })
     @PrimaryColumn({ name: 'schedule_id' })
-    schedule: Schedule;
+    schedule: JourneySchedule;
 }

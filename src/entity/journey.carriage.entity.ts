@@ -1,13 +1,15 @@
-import { Entity, Column, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
-import { TrainJourney } from './train.journey.entity';
+import { Entity, ManyToOne, PrimaryColumn, JoinColumn } from 'typeorm';
+import TrainJourney from './train.journey.entity';
 
 @Entity('journey_carriage')
-export class JourneyCarriage {
-    @Column()
-    position: number;
+export default class JourneyCarriage {
+    @PrimaryColumn({ name: 'carriage_no' })
+    carriageNo: number;
+
+    @PrimaryColumn({ name: 'journey_id' })
+    journeyId: number;
 
     @ManyToOne(() => TrainJourney)
-    @JoinColumn({ name: 'train_journey_id' })
-    @PrimaryColumn({ name: 'train_journey_id' })
+    @JoinColumn({ name: 'journey_id' })
     trainJourney: TrainJourney;
 }

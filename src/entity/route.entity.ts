@@ -1,10 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('schedule')
-export class Schedule {
+@Entity()
+export default class Route {
     @PrimaryGeneratedColumn()
-    id: number
+    id: number;
 
-    @Column({ type: 'varchar', length: 100 })
+    @Column()
     name: string;
 }
