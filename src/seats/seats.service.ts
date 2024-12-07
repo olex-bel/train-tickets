@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource, QueryFailedError } from 'typeorm';
 import { TokenService } from 'src/token/token.service';
 import { customSeatRepository, SeatRepository } from 'src/repositories/seat.repository';
@@ -8,6 +8,8 @@ import Seat from 'src/entity/seats.entity';
 import SeatReservation, { ReservationStatus } from 'src/entity/seats.reservation.entity';
 import JourneyStation from 'src/entity/journey.station.entity';
 import { SeatsReserveDto } from './dto/seats-reserve.dto';
+import { InvalidReservationTokenException } from './errors/invalid-reservation-token.exception';
+import { SeatConflictException } from './errors/seat-conflict.exception';
 
 type SeatReservationParams = {
     journeyId: string;
@@ -92,7 +94,7 @@ export class SeatsService {
             await queryRunner.rollbackTransaction();
 
             if (error instanceof QueryFailedError && 'code' in error && error.code === '23505') {
-                throw new ConflictException('Seat(s) cannot be reserved.');
+                throw new SeatConflictException('Seat(s) cannot be reserved.');
             }
 
             throw error;
@@ -115,15 +117,16 @@ export class SeatsService {
         if (existingSeats.length !== seats.length) {
             const nonExistingSeats = seats.filter(seatNo => !existingSeats.some(seat => seat.seat_no === seatNo));
 
-            throw new BadRequestException(`Seats ${nonExistingSeats.join(', ')} do not exist.`);
+            throw new Error(`Seats ${nonExistingSeats.join(', ')} do not exist.`);
         }
     }
 
     private async validateSeatAvailability(seatReservationRepository: SeatReservationRepository, seatReservationParams: SeatReservationParams) {
         const seatsAvailability = await seatReservationRepository.getSeatAvailability(seatReservationParams);
+        const reservedSeats = seatsAvailability.filter((availability) => !availability.is_avaliable);
 
-        if (seatsAvailability.length > 0) {
-            throw new ConflictException('Seat(s) cannot be reserved.');
+        if (reservedSeats.length > 0) {
+            throw new SeatConflictException('Seat(s) cannot be reserved.');
         }
     }
 
@@ -133,7 +136,7 @@ export class SeatsService {
             const validReservations = await seatReservationRepository.getReservationsByToken(existingToken);
 
             if (validReservations.length === 0) {
-                throw new ForbiddenException('Invalid token.');
+                throw new InvalidReservationTokenException('Invalid token.');
             }
 
             return { token: existingToken, expirationTime };
