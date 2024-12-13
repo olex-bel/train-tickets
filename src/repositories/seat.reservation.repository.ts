@@ -1,5 +1,5 @@
 import { Repository, Raw } from 'typeorm';
-import SeatReservation from 'src/entity/seats.reservation.entity';
+import SeatReservation from '../entity/seats.reservation.entity';
 
 type CheckSeatsParams = {
     journeyId: string;
@@ -21,11 +21,11 @@ export interface ISeatReservationRepository extends Repository<SeatReservation> 
     getSeatAvailability(params: CheckSeatsParams): Promise<SeatAvailability[]>;
 };
 
-export type CustomSeatReservationRepository = Pick<ISeatReservationRepository, 'getReservationsByToken' | 'getSeatAvailability'>;
-export type SeatReservationRepository = Repository<SeatReservation> & CustomSeatReservationRepository;
+export type CustomSeatReservationMethods = Pick<ISeatReservationRepository, 'getReservationsByToken' | 'getSeatAvailability'>;
+export type CustomSeatReservationRepository = Repository<SeatReservation> & CustomSeatReservationMethods;
 
-export const customSeatReservationRepository: CustomSeatReservationRepository = {
-    getReservationsByToken: async function (this: ISeatReservationRepository, token: string) {
+export const customSeatReservationRepository: CustomSeatReservationMethods = {
+    getReservationsByToken: async function (this: CustomSeatReservationRepository, token: string) {
         return await this.find({
             where: {
                 reservationToken: token,
@@ -34,7 +34,7 @@ export const customSeatReservationRepository: CustomSeatReservationRepository = 
         });
     },
 
-    getSeatAvailability: async function (this: ISeatReservationRepository, { journeyId, carriageNo, seats, startStopIndex, endStopIndex }: CheckSeatsParams) {
+    getSeatAvailability: async function (this: CustomSeatReservationRepository, { journeyId, carriageNo, seats, startStopIndex, endStopIndex }: CheckSeatsParams) {
         return this.createQueryBuilder('sr')
             .select(['seat_no'])
             .addSelect(`
@@ -48,5 +48,5 @@ export const customSeatReservationRepository: CustomSeatReservationRepository = 
             .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex}]` })
             .andWhere('seat_no IN (:...seats)', { seats })
             .getRawMany();
-    }
+    },
 };

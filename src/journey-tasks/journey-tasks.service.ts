@@ -1,7 +1,7 @@
 import { Injectable, Logger  } from '@nestjs/common';
 import { Cron, Interval } from '@nestjs/schedule';
-import { TrainJourneyCreatorService } from 'src/train-journey-creator/train-journey-creator.service';
-import { ReservationCleanupService } from 'src/reservation-cleanup/reservation-cleanup.service';
+import { TrainJourneyCreatorService } from '../train-journey-creator/train-journey-creator.service';
+import { ReservationCleanupService } from '../reservation-cleanup/reservation-cleanup.service';
 
 @Injectable()
 export class JourneyTasksService {

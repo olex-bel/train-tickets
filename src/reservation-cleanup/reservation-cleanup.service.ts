@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import SeatReservation from 'src/entity/seats.reservation.entity';
+import SeatReservation from '../entity/seats.reservation.entity';
 
 @Injectable()
 export class ReservationCleanupService {

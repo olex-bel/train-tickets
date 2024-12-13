@@ -6,5 +6,5 @@ export default class TrainStation {
     id: number;
  
     @Column({ type: 'varchar', length: 50, name: 'station_name'})
-    stationName: string;
+    name: string;
 }

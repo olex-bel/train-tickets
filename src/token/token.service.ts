@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { Injectable } from '@nestjs/common';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
-import { addMinutesToDate } from 'src/utils/data-utils';
+import { addMinutesToDate } from '../utils/data-utils';
+import { InvalidReservationTokenException } from '../seats/errors/invalid-reservation-token.exception';
 
 const EXPIRATION_TIME_IN_MINUTES = 5;
 
@@ -20,7 +20,7 @@ export class TokenService {
         const [randomPart, expiryPart] = token.split('-');
     
         if (!randomPart || !expiryPart) {
-            throw new BadRequestException('Invalid token format');
+            throw new Error('Invalid token format');
         }
     
         const expiryTimestamp = parseInt(Buffer.from(expiryPart, 'base64').toString(), 10);
@@ -28,7 +28,7 @@ export class TokenService {
         const currentTimestamp = Date.now();
       
         if (currentTimestamp > expirationTime.getTime()) {
-            throw new ForbiddenException('Token expired');
+            throw new InvalidReservationTokenException('Token expired');
         }
 
         return expirationTime;

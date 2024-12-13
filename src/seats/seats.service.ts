@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, QueryFailedError } from 'typeorm';
-import { TokenService } from 'src/token/token.service';
-import { customSeatRepository, SeatRepository } from 'src/repositories/seat.repository';
-import { customSeatReservationRepository, SeatReservationRepository } from 'src/repositories/seat.reservation.repository';
-import { customJourneyStationRepository } from 'src/repositories/journey.station.repository';
-import Seat from 'src/entity/seats.entity';
-import SeatReservation, { ReservationStatus } from 'src/entity/seats.reservation.entity';
-import JourneyStation from 'src/entity/journey.station.entity';
+import { TokenService } from '../token/token.service';
+import { customSeatRepository, CustomSeatRepository } from '../repositories/seat.repository';
+import { customSeatReservationRepository, CustomSeatReservationRepository } from '../repositories/seat.reservation.repository';
+import { customJourneyStationRepository, CustomJourneyStationRepository } from '../repositories/journey.station.repository';
+import Seat from '../entity/seats.entity';
+import SeatReservation, { ReservationStatus } from '../entity/seats.reservation.entity';
+import JourneyStation from '../entity/journey.station.entity';
 import { SeatsReserveDto } from './dto/seats-reserve.dto';
+import { JourneyStationDto } from 'src/trains/dto/journey-station.dto';
 import { InvalidReservationTokenException } from './errors/invalid-reservation-token.exception';
 import { SeatConflictException } from './errors/seat-conflict.exception';
 
@@ -31,20 +32,20 @@ type CreateReservationParams = {
 
 type SeatValidationParams = {
     journeyId: string;
-    carriageNo: string; 
+    carriageNo: string;
     seats: number[];
 };
 
 @Injectable()
 export class SeatsService {
-    constructor( 
+    constructor(
         private readonly tokenService: TokenService,
         private dataSource: DataSource
     ) { }
 
     async reserveSeats(journeyId: string, carriageNo: string, seatsReserveDto: SeatsReserveDto) {
         const { arrivalStationId, departureStationId, seats } = seatsReserveDto;
-        
+
         const queryRunner = this.dataSource.createQueryRunner();
         await queryRunner.connect();
 
@@ -53,9 +54,9 @@ export class SeatsService {
         const journeyStationRepository = queryRunner.manager.getRepository(JourneyStation).extend(customJourneyStationRepository);
 
         await queryRunner.startTransaction();
-        
-        const { startStopIndex, endStopIndex } = await journeyStationRepository.getStopIndices(journeyId, departureStationId, arrivalStationId);
-       
+
+        const [startStopIndex, endStopIndex] = await this.getStopIndices(journeyStationRepository, journeyId, { arrivalStationId, departureStationId });
+
         await this.validateSeats(seatRepository, {
             journeyId,
             carriageNo,
@@ -103,7 +104,7 @@ export class SeatsService {
         }
     }
 
-    private async validateSeats(seatRepository: SeatRepository, {
+    private async validateSeats(seatRepository: CustomSeatRepository, {
         journeyId,
         carriageNo,
         seats,
@@ -121,7 +122,7 @@ export class SeatsService {
         }
     }
 
-    private async validateSeatAvailability(seatReservationRepository: SeatReservationRepository, seatReservationParams: SeatReservationParams) {
+    private async validateSeatAvailability(seatReservationRepository: CustomSeatReservationRepository, seatReservationParams: SeatReservationParams) {
         const seatsAvailability = await seatReservationRepository.getSeatAvailability(seatReservationParams);
         const reservedSeats = seatsAvailability.filter((availability) => !availability.is_avaliable);
 
@@ -130,7 +131,7 @@ export class SeatsService {
         }
     }
 
-    private async handleReservationToken(seatReservationRepository: SeatReservationRepository, existingToken: string | undefined) {
+    private async handleReservationToken(seatReservationRepository: CustomSeatReservationRepository, existingToken: string | undefined) {
         if (existingToken) {
             const expirationTime = this.tokenService.decodeToken(existingToken);
             const validReservations = await seatReservationRepository.getReservationsByToken(existingToken);
@@ -146,7 +147,7 @@ export class SeatsService {
         return { token: newToken, expirationTime: reservedUntil };
     }
 
-    private createSeatReservations({journeyId, carriageNo, seats, startStopIndex, endStopIndex, token, expirationTime}: CreateReservationParams) {
+    private createSeatReservations({ journeyId, carriageNo, seats, startStopIndex, endStopIndex, token, expirationTime }: CreateReservationParams) {
         const seatReservations = [];
 
         seats.forEach((seatNo) => {
@@ -163,5 +164,18 @@ export class SeatsService {
         });
 
         return seatReservations;
+    }
+
+    private async getStopIndices(journeyStationRepository: CustomJourneyStationRepository, journeyId: string, journeyStationDto: JourneyStationDto) {
+        const { departureStationId, arrivalStationId } = journeyStationDto;
+        const stopsPositions = await journeyStationRepository.getStopsPosition(journeyId, [departureStationId, arrivalStationId]);
+
+        if (stopsPositions.length !== 2
+            || departureStationId !== stopsPositions[0].station_id
+            || arrivalStationId !== stopsPositions[1].station_id) {
+            throw new Error('Invalid journey or stations data.');
+        }
+
+        return [stopsPositions[0].stop_order, stopsPositions[1].stop_order];
     }
 }

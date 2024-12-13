@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, QueryRunner } from 'typeorm';
-import JourneySchedule, { DayOfWeek } from 'src/entity/journey.schedule.entity';
-import TrainJourney from 'src/entity/train.journey.entity';
-import RouteStationSchedule from 'src/entity/route.station.schedule.entity';
-import JourneyStation from 'src/entity/journey.station.entity';
-import CarriageAssignment from 'src/entity/carriage.assignment.entity';
-import JourneyCarriage from 'src/entity/journey.carriage.entity';
-import Seat from 'src/entity/seats.entity';
-import { addMinutesToDate } from 'src/utils/data-utils';
+import JourneySchedule, { DayOfWeek } from '../entity/journey.schedule.entity';
+import TrainJourney from '../entity/train.journey.entity';
+import RouteStationSchedule from '../entity/route.station.schedule.entity';
+import JourneyStation from '../entity/journey.station.entity';
+import CarriageAssignment from '../entity/carriage.assignment.entity';
+import JourneyCarriage from '../entity/journey.carriage.entity';
+import Seat from '../entity/seats.entity';
+import { addMinutesToDate } from '../utils/data-utils';
 
 @Injectable()
 export class TrainJourneyCreatorService {

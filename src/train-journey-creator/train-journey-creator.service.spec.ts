@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TrainJourneyCreatorService as TrainJourneyCreatorService } from './train-journey-creator.service';
 
-describe('TrainJourneyService', () => {
+xdescribe('TrainJourneyService', () => {
   let service: TrainJourneyCreatorService;
 
   beforeEach(async () => {

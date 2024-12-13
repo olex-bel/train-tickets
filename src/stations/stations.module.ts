@@ -1,12 +1,25 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getDataSourceToken, getRepositoryToken } from '@nestjs/typeorm';
 import { StationsController } from './stations.controller';
 import { StationsService } from './stations.service';
-import TrainStation from 'src/entity/train.station.entity';
+import TrainStation from '../entity/train.station.entity';
+import { DataSource } from 'typeorm';
+import { customTrainStationRepository } from '../repositories/train.station.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TrainStation])],
   controllers: [StationsController],
-  providers: [StationsService],
+  providers: [
+    {
+      provide: getRepositoryToken(TrainStation),
+      inject: [getDataSourceToken()],
+      useFactory(dataSource: DataSource) {
+        return dataSource
+          .getRepository(TrainStation)
+          .extend(customTrainStationRepository);
+      },
+    },
+    StationsService
+  ],
 })
-export class StationsModule {}
+export class StationsModule { }
