@@ -93,8 +93,8 @@ export class SeatsService {
             };
         } catch (error) {
             await queryRunner.rollbackTransaction();
-
-            if (error instanceof QueryFailedError && 'code' in error && error.code === '23505') {
+            
+            if (error instanceof QueryFailedError && 'code' in error && error.code === '23P01') {
                 throw new SeatConflictException('Seat(s) cannot be reserved.');
             }
 
@@ -156,7 +156,7 @@ export class SeatsService {
             seatReservation.seatNo = seatNo;
             seatReservation.carriageNo = +carriageNo;
             seatReservation.journeyId = +journeyId;
-            seatReservation.startEndtStations = `[${startStopIndex}, ${endStopIndex}]`;
+            seatReservation.startEndtStations = `[${startStopIndex}, ${endStopIndex})`;
             seatReservation.reservationToken = token;
             seatReservation.reservedUntil = expirationTime;
             seatReservation.status = ReservationStatus.RESERVED;
@@ -171,8 +171,8 @@ export class SeatsService {
         const stopsPositions = await journeyStationRepository.getStopsPosition(journeyId, [departureStationId, arrivalStationId]);
 
         if (stopsPositions.length !== 2
-            || departureStationId !== stopsPositions[0].station_id
-            || arrivalStationId !== stopsPositions[1].station_id) {
+            || departureStationId !== +stopsPositions[0].station_id
+            || arrivalStationId !== +stopsPositions[1].station_id) {
             throw new Error('Invalid journey or stations data.');
         }
 

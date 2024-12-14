@@ -11,8 +11,10 @@ export default class RouteStationSchedule {
 
     @ManyToOne(() => Route)
     @JoinColumn({ name: 'route_id', referencedColumnName: 'id' })
-    @PrimaryColumn({ name: 'route_id' })
     route: Route;
+
+    @PrimaryColumn({ name: 'route_id' })
+    routeId: number;
 
     @Column({ name: 'stop_order' })
     stopOrder: number;

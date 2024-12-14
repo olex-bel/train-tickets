@@ -1,12 +1,12 @@
-import { IsNotEmpty, IsNumberString, IsString, MaxLength, ArrayMaxSize, IsOptional } from "class-validator";
+import { IsNotEmpty, IsInt, IsString, MaxLength, ArrayMaxSize, IsOptional } from "class-validator";
 
 export class SeatsReserveDto {
     @IsNotEmpty()
-    @IsNumberString ()
+    @IsInt()
     departureStationId: number;
 
     @IsNotEmpty()
-    @IsNumberString ()
+    @IsInt()
     arrivalStationId: number;
 
     @IsNotEmpty()

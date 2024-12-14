@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, QueryRunner } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
 import JourneySchedule, { DayOfWeek } from '../entity/journey.schedule.entity';
 import TrainJourney from '../entity/train.journey.entity';
 import RouteStationSchedule from '../entity/route.station.schedule.entity';
@@ -9,6 +9,7 @@ import CarriageAssignment from '../entity/carriage.assignment.entity';
 import JourneyCarriage from '../entity/journey.carriage.entity';
 import Seat from '../entity/seats.entity';
 import { addMinutesToDate } from '../utils/data-utils';
+import { IJourneyScheduleRepository } from '../repositories/journey.schedule.repository';
 
 @Injectable()
 export class TrainJourneyCreatorService {
@@ -16,18 +17,18 @@ export class TrainJourneyCreatorService {
 
     constructor(
         @InjectRepository(JourneySchedule)
-        private readonly journeySchedule: Repository<JourneySchedule>,
-        @InjectRepository(TrainJourney)
-        private readonly trainJourney: Repository<TrainJourney>,
+        private readonly journeySchedule: IJourneyScheduleRepository,
         private dataSource: DataSource
     ) { }
 
     async createJourneys() {
         const processingDay = new Date();
+        const currentDayOfMonth = processingDay.getDate();
         this.logger.debug('Start creating journeys.');
 
         for (let i = 0; i < 7; i++) {
-            processingDay.setDate(processingDay.getDate() + i);
+            processingDay.setDate(currentDayOfMonth + i);
+            this.logger.debug(`Processing for the day ${processingDay}`);
             await this.processJourneysForDay(processingDay);
         }
 
@@ -47,17 +48,7 @@ export class TrainJourneyCreatorService {
     }
 
     private async getJourneysToCreate(dayOfWeek: string, processingDay: Date) {
-        const existingJourneyQB = this.trainJourney.createQueryBuilder('tj')
-            .select('id')
-            .where('start_date = cast(:startDate as DATE) + js.departure_time')
-            .andWhere('route_id = js.route_id');
-
-        return this.journeySchedule.createQueryBuilder('js')
-            .leftJoinAndSelect("js.route", "route")
-            .where('js.dayOfWeek = :dayOfWeek', { dayOfWeek })
-            .andWhere(`NOT EXISTS (${existingJourneyQB.getQuery()})`)
-            .setParameter('startDate', processingDay.toISOString().substring(0, 10))
-            .getMany();
+        return this.journeySchedule.getJourneysToCreate(dayOfWeek, processingDay);
     }
 
     private async createJourney(journeySchedule: JourneySchedule, date: Date) {
@@ -102,9 +93,14 @@ export class TrainJourneyCreatorService {
 
     private async generateJourneyStations(queryRunner: QueryRunner, trainJourney: TrainJourney, startDate: Date) {
         const routeStationScheduleRepository = queryRunner.manager.getRepository(RouteStationSchedule);
-        const routeStations = await routeStationScheduleRepository.createQueryBuilder()
-            .where('route_id = :routeId', { routeId: trainJourney.route.id })
-            .getMany();
+        const routeStations = await routeStationScheduleRepository.find({
+            where: {
+                routeId: trainJourney.route.id,
+            },
+            relations: {
+                route: true,
+            },
+        });
 
         if (routeStations.length === 0) {
             throw new Error(`No stations found for route ${trainJourney.route.id}.`);

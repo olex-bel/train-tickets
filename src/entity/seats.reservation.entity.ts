@@ -1,4 +1,4 @@
-import { Entity, Column, OneToOne, JoinColumn, PrimaryGeneratedColumn, Index, Exclusion } from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, PrimaryGeneratedColumn, Index, Exclusion } from 'typeorm';
 import Seat from './seats.entity';
 
 export enum ReservationStatus {
@@ -14,7 +14,7 @@ export default class SeatReservation {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @OneToOne(() => Seat)
+    @ManyToOne(() => Seat)
     @JoinColumn([
         { name: 'carriage_no', referencedColumnName: 'carriageNo' },
         { name: 'seat_no', referencedColumnName: 'seatNo' },
