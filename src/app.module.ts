@@ -25,7 +25,6 @@ import { TokenModule } from './token/token.module';
                 password: configService.get('POSTGRES_PASSWORD'),
                 database: configService.get('POSTGRES_DB'),
                 entities: ['dist/**/*.entity.js'],
-                synchronize: true,
                 logging: 'all',
             }),
             inject: [ConfigService],
