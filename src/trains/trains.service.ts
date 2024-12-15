@@ -52,8 +52,8 @@ export class TrainsService {
         const stopsPositions = await this.journeyStationRepository.getStopsPosition(journeyId, [departureStationId, arrivalStationId]);
 
         if (stopsPositions.length !== 2
-            || departureStationId !== stopsPositions[0].station_id
-            || arrivalStationId !== stopsPositions[1].station_id) {
+            || departureStationId !== +stopsPositions[0].station_id
+            || arrivalStationId !== +stopsPositions[1].station_id) {
             throw new Error('Invalid journey or stations data.'); 
         }
 
