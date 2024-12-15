@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsNumberString  } from "class-validator";
+import { IsNotEmpty, IsInt  } from "class-validator";
 
 export class JourneyStationDto {
     @IsNotEmpty()
-    @IsNumberString ()
+    @IsInt()
     departureStationId: number;
 
     @IsNotEmpty()
-    @IsNumberString ()
+    @IsInt()
     arrivalStationId: number;
 }
