@@ -12,7 +12,7 @@ export class JourneyTasksService {
        private readonly reservationCleanupService: ReservationCleanupService
     ) {}
 
-    @Cron('45 * * * * *')
+    @Cron('0 4 * * * *')
     async createJourneys() {
        await this.trainJourneyService.createJourneys();
     }
