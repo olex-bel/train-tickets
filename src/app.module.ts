@@ -24,6 +24,7 @@ import { TokenModule } from './token/token.module';
                 username: configService.get('POSTGRES_USER'),
                 password: configService.get('POSTGRES_PASSWORD'),
                 database: configService.get('POSTGRES_DB'),
+                ssl: configService.get('POSTGRES_SSL') === 'true',
                 entities: ['dist/**/*.entity.js'],
                 logging: 'all',
             }),
