@@ -81,8 +81,7 @@ export const customSeatRepository: CustomSeatMethods = {
             .select(['s.seat_no', 's.class_id'])
             .addSelect(`
             CASE
-                WHEN sr.status = 'sold' THEN false
-                WHEN sr.status = 'reserved' AND sr.reserved_until < NOW() THEN false
+                WHEN status = 'sold' OR status = 'reserved' THEN false
                 ELSE true
             END
         `, 'is_avaliable')
