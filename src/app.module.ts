@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TerminusModule } from '@nestjs/terminus';
 import { StationsModule } from './stations/stations.module';
 import { TrainsModule } from './trains/trains.module';
 import { JourneyTasksModule } from './journey-tasks/journey-tasks.module';
@@ -9,6 +10,7 @@ import { TrainJourneyCreatorModule } from './train-journey-creator/train-journey
 import { ReservationCleanupModule } from './reservation-cleanup/reservation-cleanup.module';
 import { SeatsModule } from './seats/seats.module';
 import { TokenModule } from './token/token.module';
+import { HealthController } from './health/health.controller';
 
 @Module({
     imports: [
@@ -26,10 +28,11 @@ import { TokenModule } from './token/token.module';
                 database: configService.get('POSTGRES_DB'),
                 ssl: configService.get('POSTGRES_SSL') === 'true',
                 entities: ['dist/**/*.entity.js'],
-                logging: 'all',
+                // logging: 'all',
             }),
             inject: [ConfigService],
         }),
+        TerminusModule,
         ScheduleModule.forRoot(),
         StationsModule,
         TrainsModule,
@@ -39,5 +42,6 @@ import { TokenModule } from './token/token.module';
         SeatsModule,
         TokenModule,
     ],
+    controllers: [HealthController],
 })
 export class AppModule {}
