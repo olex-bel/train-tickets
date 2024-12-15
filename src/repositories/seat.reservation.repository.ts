@@ -45,7 +45,7 @@ export const customSeatReservationRepository: CustomSeatReservationMethods = {
             `, 'is_avaliable')
             .where('journey_id = :journeyId', { journeyId })
             .andWhere('carriage_no = :carriageNo', { carriageNo })
-            .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex}]` })
+            .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex})` })
             .andWhere('seat_no IN (:...seats)', { seats })
             .getRawMany();
     },

@@ -63,7 +63,7 @@ export const customSeatRepository: CustomSeatMethods = {
                     .select(['rs.seat_no', 'rs.carriage_no'])
                     .from('seats_reservation', 'rs')
                     .where('rs.journey_id = :journeyId')
-                    .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex}]` });
+                    .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex})` });
             }, 'sr', 'sr.seat_no = s.seat_no AND sr.carriage_no = s.carriage_no')
             .where('s.journey_id = :journeyId')
             .andWhere('sr.seat_no is NULL')
@@ -90,7 +90,7 @@ export const customSeatRepository: CustomSeatMethods = {
                     .select(['seat_no', 'carriage_no', 'status', 'reserved_until'])
                     .from('seats_reservation', 'rs')
                     .where('journey_id = :journeyId')
-                    .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex}]` });
+                    .andWhere('start_end_stations @> :stationRange', { stationRange: `[${startStopIndex}, ${endStopIndex})` });
             }, 'sr', 'sr.seat_no = s.seat_no AND sr.carriage_no = s.carriage_no')
             .where('s.journey_id = :journeyId')
             .andWhere('s.carriage_no = :carriageNo')
